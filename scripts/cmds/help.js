@@ -96,4 +96,4 @@ function roleTextToString(role) {
     case 2: return "🤖 Bot Admins";
     default: return "❓ Unknown Role";
   }
-}
+    }
