@@ -1,167 +1,88 @@
-const { drive, getStreamFromURL, getExtFromUrl, getTime } = global.utils;
+const { getTime, drive } = global.utils;
+
+if (!global.temp.welcomeEvent) global.temp.welcomeEvent = {};
 
 module.exports = {
-	config: {
-		name: "setwelcome",
-		aliases: ["setwc"],
-		version: "1.7",
-		author: "NTKhang",
-		countDown: 5,
-		role: 1,
-		description: {
-			vi: "Chỉnh sửa nội dung tin nhắn chào mừng thành viên mới tham gia vào nhóm chat của bạn",
-			en: "Edit welcome message content when new member join your group chat"
-		},
-		category: "custom",
-		guide: {
-			vi: {
-				body: "   {pn} text [<nội dung> | reset]: chỉnh sửa nội dung văn bản hoặc reset về mặc định, với những shortcut có sẵn:"
-					+ "\n  + {userName}: tên của thành viên mới"
-					+ "\n  + {userNameTag}: tên của thành viên mới (tag)"
-					+ "\n  + {boxName}:  tên của nhóm chat"
-					+ "\n  + {multiple}: bạn || các bạn"
-					+ "\n  + {session}:  buổi trong ngày"
-					+ "\n\n   Ví dụ:"
-					+ "\n    {pn} text Hello {userName}, welcome to {boxName}, chúc {multiple} một ngày mới vui vẻ"
-					+ "\n"
-					+ "\n   Reply (phản hồi) hoặc gửi kèm một tin nhắn có file với nội dung {pn} file: để thêm tệp đính kèm vào tin nhắn chào mừng (ảnh, video, audio)"
-					+ "\n\n   Ví dụ:"
-					+ "\n    {pn} file reset: xóa gửi file",
-				attachment: {
-					[`${__dirname}/assets/guide/setwelcome/setwelcome_vi_1.png`]: "https://i.ibb.co/vd6bQrW/setwelcome-vi-1.png"
-				}
-			},
-			en: {
-				body: "   {pn} text [<content> | reset]: edit text content or reset to default, with some shortcuts:"
-					+ "\n  + {userName}: new member name"
-					+ "\n  + {userNameTag}: new member name (tag)"
-					+ "\n  + {boxName}:  group chat name"
-					+ "\n  + {multiple}: you || you guys"
-					+ "\n  + {session}:  session in day"
-					+ "\n\n   Example:"
-					+ "\n    {pn} text Hello {userName}, welcome to {boxName}, have a nice day {multiple}"
-					+ "\n"
-					+ "\n   Reply (phản hồi) or send a message with file with content {pn} file: to add file attachments to welcome message (image, video, audio)"
-					+ "\n\n   Example:"
-					+ "\n    {pn} file reset: delete file attachments",
-				attachment: {
-					[`${__dirname}/assets/guide/setwelcome/setwelcome_en_1.png`]: "https://i.ibb.co/vsCz0ks/setwelcome-en-1.png"
-				}
-			}
-		}
-	},
+        config: {
+                name: "welcome",
+                version: "2.0",
+                author: "BaYjid",
+                category: "events"
+        },
 
-	langs: {
-		vi: {
-			turnedOn: "Đã bật chức năng chào mừng thành viên mới",
-			turnedOff: "Đã tắt chức năng chào mừng thành viên mới",
-			missingContent: "Vui lùng nhập nội dung tin nhắn",
-			edited: "Đã chỉnh sửa nội dung tin nhắn chào mừng của nhóm bạn thành: %1",
-			reseted: "Đã reset nội dung tin nhắn chào mừng",
-			noFile: "Không có tệp đính kèm tin nhắn chào mừng nào để xóa",
-			resetedFile: "Đã reset tệp đính kèm thành công",
-			missingFile: "Hãy phản hồi tin nhắn này kèm file ảnh/video/audio",
-			addedFile: "Đã thêm %1 tệp đính kèm vào tin nhắn chào mừng của nhóm bạn"
-		},
-		en: {
-			turnedOn: "Turned on welcome message",
-			turnedOff: "Turned off welcome message",
-			missingContent: "Please enter welcome message content",
-			edited: "Edited welcome message content of your group to: %1",
-			reseted: "Reseted welcome message content",
-			noFile: "No file attachments to delete",
-			resetedFile: "Reseted file attachments successfully",
-			missingFile: "Please reply this message with image/video/audio file",
-			addedFile: "Added %1 file attachments to your group welcome message"
-		}
-	},
+        langs: {
+                vi: {
+                        session1: "☀ 𝗦𝗮́𝗻𝗴",
+                        session2: "⛅ 𝗧𝗿𝘂̛𝗮",
+                        session3: "🌆 𝗖𝗵𝗶𝗲̂̀𝘂",
+                        session4: "🌙 𝗧𝗼̂́𝗶",
+                        welcomeMessage: "✨ 𝗖𝗮̉𝗺 𝗼̛𝗻 𝗯𝗮̣𝗻 𝗱𝗮̃ 𝗺𝗼̛̀𝗶 𝘁𝗼̂𝗶 𝘃𝗮̀𝗼 𝗻𝗵𝗼́𝗺!\n⚡ 𝗣𝗿𝗲𝗳𝗶𝘅 𝗯𝗼𝘁: %1\n🔎 Đ𝗲̂̉ 𝘅𝗲𝗺 𝗱𝗮𝗻𝗵 𝘀𝗮́𝗰𝗵 𝗹𝗲̣̂𝗻𝗵 𝗵𝗮̃𝘆 𝗻𝗵𝗮̣̂𝗽: %1help",
+                        multiple1: "🔹 𝗕𝗮̣𝗻",
+                        multiple2: "🔹 𝗖𝗮́𝗰 𝗯𝗮̣𝗻",
+                        defaultWelcomeMessage: "🎉 𝗖𝗵𝗮̀𝗼 𝗺𝘂̛̀𝗻𝗴 {userName} 🎊\n\n🚀 𝗖𝗵𝗮̀𝗼 𝗺𝘂̛̀𝗻𝗴 𝗯𝗮̣𝗻 𝗱𝗲̂́𝗻 𝘃𝗼̛́𝗶 『 {boxName} 』\n🔹 𝗖𝗵𝘂́𝗰 𝗯𝗮̣𝗻 𝗰𝗼́ 𝗯𝘂𝗼̂̉𝗶 {session} 𝘃𝘂𝗶 𝘃𝗲̉! ✨"
+                },
+                en: {
+                        session1: "☀ 𝓜𝓸𝓻𝓷𝓲𝓷𝓰",
+                        session2: "⛅ 𝓝𝓸𝓸𝓷",
+                        session3: "🌆 𝓐𝓯𝓽𝓮𝓻𝓷𝓸𝓸𝓷",
+                        session4: "🌙 𝓔𝓿𝓮𝓷𝓲𝓷𝓰",
+                        welcomeMessage: "-`ღ´🦋𝗠𝗲𝗹𝗶𝘀𝗮🍒🥂\n\n🚀 𝗧𝗵𝗮𝗻𝗸 𝘆𝗼𝘂 𝗳𝗼𝗿 𝗶𝗻𝘃𝗶𝘁𝗶𝗻𝗴 𝗺𝗲!\n⚡ 𝗕𝗼𝘁 𝗣𝗿𝗲𝗳𝗶𝘅: %1\n🔎 𝗧𝗼 𝗰𝗵𝗲𝗰𝗸 𝗮𝗹𝗹 𝗰𝗼𝗺𝗺𝗮𝗻𝗱𝘀, 𝘁𝘆𝗽𝗲: %1help\n\n✨ 𝗛𝗮𝘃𝗲 𝗮 𝗴𝗿𝗲𝗮𝘁 𝘁𝗶𝗺𝗲! ✨",
+                        multiple1: "🔹 𝖸𝗈𝗎",
+                        multiple2: "🔹 𝖸𝗈𝗎 𝖦𝗎𝗒𝗌",
+                        defaultWelcomeMessage: "🎉 『 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 』 🎉\n\n💠 𝗛𝗲𝘆 {userName}!\n🔹 𝗬𝗼𝘂 𝗷𝘂𝘀𝘁 𝗷𝗼𝗶𝗻𝗲𝗱 『 {boxName} 』\n⏳ 𝗧𝗶𝗺𝗲 𝗳𝗼𝗿 𝘀𝗼𝗺𝗲 𝗳𝘂𝗻! 𝗛𝗮𝘃𝗲 𝗮 𝗳𝗮𝗻𝘁𝗮𝘀𝘁𝗶𝗰 {session} 🎊\n\n⚠ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗳𝗼𝗹𝗹𝗼𝘄 𝗮𝗹𝗹 𝗴𝗿𝗼𝘂𝗽 𝗿𝘂𝗹𝗲𝘀! 🚀\n\n👤 𝗔𝗱𝗱𝗲𝗱 𝗯𝘆: {adderName}"
+                }
+        },
 
-	onStart: async function ({ args, threadsData, message, event, commandName, getLang }) {
-		const { threadID, senderID, body } = event;
-		const { data, settings } = await threadsData.get(threadID);
+        onStart: async ({ threadsData, message, event, api, getLang }) => {
+                if (event.logMessageType !== "log:subscribe") return;
 
-		switch (args[0]) {
-			case "text": {
-				if (!args[1])
-					return message.reply(getLang("missingContent"));
-				else if (args[1] == "reset")
-					delete data.welcomeMessage;
-				else
-					data.welcomeMessage = body.slice(body.indexOf(args[0]) + args[0].length).trim();
-				await threadsData.set(threadID, {
-					data
-				});
-				message.reply(data.welcomeMessage ? getLang("edited", data.welcomeMessage) : getLang("reseted"));
-				break;
-			}
-			case "file": {
-				if (args[1] == "reset") {
-					const { welcomeAttachment } = data;
-					if (!welcomeAttachment)
-						return message.reply(getLang("noFile"));
-					try {
-						await Promise.all(data.welcomeAttachment.map(fileId => drive.deleteFile(fileId)));
-						delete data.welcomeAttachment;
-					}
-					catch (e) { }
-					await threadsData.set(threadID, {
-						data
-					});
-					message.reply(getLang("resetedFile"));
-				}
-				else if (event.attachments.length == 0 && (!event.messageReply || event.messageReply.attachments.length == 0))
-					return message.reply(getLang("missingFile"), (err, info) => {
-						global.GoatBot.onReply.set(info.messageID, {
-							messageID: info.messageID,
-							author: senderID,
-							commandName
-						});
-					});
-				else {
-					saveChanges(message, event, threadID, senderID, threadsData, getLang);
-				}
-				break;
-			}
-			case "on":
-			case "off": {
-				settings.sendWelcomeMessage = args[0] == "on";
-				await threadsData.set(threadID, { settings });
-				message.reply(settings.sendWelcomeMessage ? getLang("turnedOn") : getLang("turnedOff"));
-				break;
-			}
-			default:
-				message.SyntaxError();
-				break;
-		}
-	},
+                const { threadID, logMessageData } = event;
+                const { addedParticipants } = logMessageData;
+                const hours = getTime("HH");
+                const prefix = global.utils.getPrefix(threadID);
+                const nickNameBot = global.GoatBot.config.nickNameBot;
 
-	onReply: async function ({ event, Reply, message, threadsData, getLang }) {
-		const { threadID, senderID } = event;
-		if (senderID != Reply.author)
-			return;
+                if (addedParticipants.some(user => user.userFbId === api.getCurrentUserID())) {
+                        if (nickNameBot) api.changeNickname(nickNameBot, threadID, api.getCurrentUserID());
+                        return message.send(getLang("welcomeMessage", prefix));
+                }
 
-		if (event.attachments.length == 0 && (!event.messageReply || event.messageReply.attachments.length == 0))
-			return message.reply(getLang("missingFile"));
-		saveChanges(message, event, threadID, senderID, threadsData, getLang);
-	}
-};
+                if (!global.temp.welcomeEvent[threadID]) {
+                        global.temp.welcomeEvent[threadID] = { joinTimeout: null, dataAddedParticipants: [] };
+                }
 
-async function saveChanges(message, event, threadID, senderID, threadsData, getLang) {
-	const { data } = await threadsData.get(threadID);
-	const attachments = [...event.attachments, ...(event.messageReply?.attachments || [])].filter(item => ["photo", 'png', "animated_image", "video", "audio"].includes(item.type));
-	if (!data.welcomeAttachment)
-		data.welcomeAttachment = [];
+                global.temp.welcomeEvent[threadID].dataAddedParticipants.push(...addedParticipants);
 
-	await Promise.all(attachments.map(async attachment => {
-		const { url } = attachment;
-		const ext = getExtFromUrl(url);
-		const fileName = `${getTime()}.${ext}`;
-		const infoFile = await drive.uploadFile(`setwelcome_${threadID}_${senderID}_${fileName}`, await getStreamFromURL(url));
-		data.welcomeAttachment.push(infoFile.id);
-	}));
+                clearTimeout(global.temp.welcomeEvent[threadID].joinTimeout);
 
-	await threadsData.set(threadID, {
-		data
-	});
-	message.reply(getLang("addedFile", attachments.length));
-}
+                global.temp.welcomeEvent[threadID].joinTimeout = setTimeout(async () => {
+                        const threadData = await threadsData.get(threadID);
+                        if (threadData.settings.sendWelcomeMessage === false) return;
+
+                        const dataAddedParticipants = global.temp.welcomeEvent[threadID].dataAddedParticipants;
+                        const bannedUsers = threadData.data.banned_ban || [];
+                        const threadName = threadData.threadName;
+
+                        let newMembers = [], mentions = [];
+                        let isMultiple = dataAddedParticipants.length > 1;
+
+                        for (const user of dataAddedParticipants) {
+                                if (bannedUsers.some(banned => banned.id === user.userFbId)) continue;
+                                newMembers.push(user.fullName);
+                                mentions.push({ tag: user.fullName, id: user.userFbId });
+                        }
+
+                        if (newMembers.length === 0) return;
+
+                        // Get info of the adder
+                        const adderID = event.author;
+                        const adderInfo = await api.getUserInfo(adderID);
+                        const adderName = adderInfo[adderID]?.name || "Someone";
+                        mentions.push({ tag: adderName, id: adderID });
+
+                        let welcomeMessage = threadData.data.welcomeMessage || getLang("defaultWelcomeMessage");
+
+                        welcomeMessage = welcomeMessage
+                                .replace(/\{userName\}|\{userNameTag\}/g, newMembers.join(", "))
+                                .replace(/\{boxName\}|\{threadName\}/g, threadName)
+                                .replace(/\{multiple\}/g, isMultiple ? getLang("multiple2") : getLang("mul
