@@ -35,3 +35,80 @@ module.exports = {
 
         onStart: async ({ threadsData, message, event, api, getLang }) => {
                 if (event.logMessageType !== "log:subscribe") return;
+
+                const { threadID, logMessageData } = event;
+                const { addedParticipants } = logMessageData;
+                const hours = getTime("HH");
+                const prefix = global.utils.getPrefix(threadID);
+                const nickNameBot = global.GoatBot.config.nickNameBot;
+
+                if (addedParticipants.some(user => user.userFbId === api.getCurrentUserID())) {
+                        if (nickNameBot) api.changeNickname(nickNameBot, threadID, api.getCurrentUserID());
+                        return message.send(getLang("welcomeMessage", prefix));
+                }
+
+                if (!global.temp.welcomeEvent[threadID]) {
+                        global.temp.welcomeEvent[threadID] = { joinTimeout: null, dataAddedParticipants: [] };
+                }
+
+                global.temp.welcomeEvent[threadID].dataAddedParticipants.push(...addedParticipants);
+
+                clearTimeout(global.temp.welcomeEvent[threadID].joinTimeout);
+
+                global.temp.welcomeEvent[threadID].joinTimeout = setTimeout(async () => {
+                        const threadData = await threadsData.get(threadID);
+                        if (threadData.settings.sendWelcomeMessage === false) return;
+
+                        const dataAddedParticipants = global.temp.welcomeEvent[threadID].dataAddedParticipants;
+                        const bannedUsers = threadData.data.banned_ban || [];
+                        const threadName = threadData.threadName;
+
+                        let newMembers = [], mentions = [];
+                        let isMultiple = dataAddedParticipants.length > 1;
+
+                        for (const user of dataAddedParticipants) {
+                                if (bannedUsers.some(banned => banned.id === user.userFbId)) continue;
+                                newMembers.push(user.fullName);
+                                mentions.push({ tag: user.fullName, id: user.userFbId });
+                        }
+
+                        if (newMembers.length === 0) return;
+
+                        // Get info of the adder
+                        const adderID = event.author;
+                        const adderInfo = await api.getUserInfo(adderID);
+                        const adderName = adderInfo[adderID]?.name || "Someone";
+                        mentions.push({ tag: adderName, id: adderID });
+
+                        let welcomeMessage = threadData.data.welcomeMessage || getLang("defaultWelcomeMessage");
+
+                        welcomeMessage = welcomeMessage
+                                .replace(/\{userName\}|\{userNameTag\}/g, newMembers.join(", "))
+                                .replace(/\{boxName\}|\{threadName\}/g, threadName)
+                                .replace(/\{multiple\}/g, isMultiple ? getLang("multiple2") : getLang("multiple1"))
+                                .replace(/\{session\}/g,
+                                        hours <= 10 ? getLang("session1") :
+                                        hours <= 12 ? getLang("session2") :
+                                        hours <= 18 ? getLang("session3") : getLang("session4")
+                                )
+                                .replace(/\{adderName\}/g, adderName);
+
+                        let form = {
+                                body: welcomeMessage,
+                                mentions: mentions
+                        };
+
+                        if (threadData.data.welcomeAttachment) {
+                                const files = threadData.data.welcomeAttachment;
+                                const attachments = files.map(file => drive.getFile(file, "stream"));
+
+                                form.attachment = (await Promise.allSettled(attachments))
+                                        .filter(({ status }) => status === "fulfilled")
+                                        .map(({ value }) => value);
+                        }
+
+                        message.send(form);
+                        delete global.temp.welcomeEvent[threadID];
+                }, 1500);
+        }
+};
